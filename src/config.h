@@ -17,7 +17,7 @@ struct configDataStruct {
 #endif
 
 void setUpConfig();
-void saveConfigCallback();
+void saveConfig();
 char* getDeviceName();
 char* getMqttServer();
 unsigned long getMqttPort();

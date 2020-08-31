@@ -34,7 +34,7 @@ void setup() {
 void loop() {
   //Serial.println("Loop iteration.");
   int a = analogRead(A0);
-  Serial.println(voltageToAngle(a));
+  //Serial.println(voltageToAngle(a));
   //Serial.println(constrain(map(a, 4, 910, 0, 255), 0, 255));
   analogWrite(FAN_PWM_PIN, constrain(map(voltageToAngle(a), 43, 204, 0, PWMRANGE), 0, PWMRANGE));
   //analogWrite(FAN_PWM_PIN, 375);
