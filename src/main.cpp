@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "config.h"
 
 #define TACHO_PIN 4
 #define FAN_PWM_PIN 5
@@ -26,6 +27,7 @@ void setup() {
   lastTrigger = millis();
   attachInterrupt(digitalPinToInterrupt(TACHO_PIN), onFanRotation, RISING);
   while(!Serial) {}  // Wait for Serial to start
+  setUpConfig();
   Serial.println("\n\nSetup complete.");
 }
 
