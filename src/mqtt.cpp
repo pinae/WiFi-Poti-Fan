@@ -10,6 +10,7 @@
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 subscribedMqttTopicList* subscribedTopicsList;
+void (*savedSubscriptionCallback)();
 
 #endif
 
@@ -19,17 +20,8 @@ void onMqttMessage(char* topic, byte* payload, unsigned int length) {
     *(plStr + length) = 0;
     Serial.printf("MQTT: %s (len: %d) - Payload: %s\n", 
                   topic, length, plStr);
-    Serial.println("-----------------");
-    Serial.print("subscribedTopicsList: "); Serial.println((int) subscribedTopicsList);
     subscribedMqttTopicList* stl = subscribedTopicsList;
-    Serial.print("before loop... stl: "); Serial.println((int) stl);
     while(stl != NULL) {
-        Serial.print("stl: "); Serial.println((int) stl);
-        Serial.print("stl.entry: "); Serial.println((int) stl->entry);
-        Serial.print("topic: "); Serial.println(topic);
-        Serial.print("stl.entry.topic: "); Serial.println((char*) stl->entry->topic);
-        Serial.print("stl.entry.topic: "); Serial.println((*(*stl).entry).topic);
-        Serial.print("stl.entry.callback: "); Serial.println((int) stl->entry->callback);
         if (strcmp(stl->entry->topic, topic) == 0) {
             Serial.printf("Found topic: %s\n", stl->entry->topic);
             stl->entry->callback(plStr);
@@ -37,6 +29,7 @@ void onMqttMessage(char* topic, byte* payload, unsigned int length) {
         }
         stl = (*stl).next;
     }
+    Serial.println("-----------------");
     free(plStr);
 }
 
@@ -57,14 +50,9 @@ void subscribeToTopic(char* topic, void (*callback)(char*)) {
     newTopicListElem->next = subscribedTopicsList;
     subscribedTopicsList = newTopicListElem;
     Serial.print("Subscribed to MQTT-topic: "); Serial.println(fullTopicStr);
-    //free(fullTopicStr);
 }
 
-void printPayload(char* payload) {
-    Serial.println(payload);
-}
-
-void connectToMqtt() {
+void connectToMqtt(void (*subscriptionCallback)()) {
     boolean successfullyConnected = false;
     while (!mqttClient.connected()) {
         Serial.print("Attempting MQTT connection... ");
@@ -78,7 +66,7 @@ void connectToMqtt() {
         }
         if (successfullyConnected) {
             Serial.println("connected!");
-            subscribeToTopic((char*) "setFanSpeed", printPayload);
+            subscriptionCallback();
         } else {
             Serial.print("failed, rc=");
             Serial.print(mqttClient.state());
@@ -89,10 +77,11 @@ void connectToMqtt() {
     }
 }
 
-void mqttSetup() {
+void mqttSetup(void (*subscriptionCallback)()) {
+    savedSubscriptionCallback = subscriptionCallback;
     mqttClient.setServer(getMqttServer(), getMqttPort());
     mqttClient.setCallback(onMqttMessage);
-    connectToMqtt();
+    connectToMqtt(subscriptionCallback);
 }
 
 void publishToMqtt(char* topic, char* payload) {
@@ -101,7 +90,7 @@ void publishToMqtt(char* topic, char* payload) {
 
 void mqttLoop() {
     if (!mqttClient.connected()) {
-        connectToMqtt();
+        connectToMqtt(savedSubscriptionCallback);
     }
     mqttClient.loop();
 }

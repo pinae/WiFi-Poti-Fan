@@ -13,7 +13,7 @@ struct subscribedMqttTopicList {
 
 #endif
 
-void mqttSetup();
+void mqttSetup(void (*subscriptionCallback)());
 void mqttLoop();
-void subscribeToTopic(char* topic);
+void subscribeToTopic(char* topic, void (*callback)(char*));
 void publishToMqtt(char* topic, char* payload);

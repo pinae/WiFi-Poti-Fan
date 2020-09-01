@@ -18,6 +18,14 @@ float voltageToAngle(float voltage) {
   return 3.16306348e-86 * pow(voltage - 4.62751482e+02, 33) + 5.33460164e-03 * voltage + 1.81394601e+02;
 }
 
+void printPayload(char* payload) {
+  Serial.println(payload);
+}
+
+void mqttSubscribe() {
+  subscribeToTopic((char*) "setFanSpeed", printPayload);
+}
+
 void setup() {
   Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
@@ -29,7 +37,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(TACHO_PIN), onFanRotation, RISING);
   while(!Serial) {}  // Wait for Serial to start
   setUpConfig();
-  mqttSetup();
+  mqttSetup(mqttSubscribe);
   Serial.println("\n\nSetup complete.");
 }
 
