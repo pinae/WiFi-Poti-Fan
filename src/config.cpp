@@ -4,6 +4,7 @@
 #include <WiFiManager.h>
 #include <EEPROM.h>
 #include "config.h"
+#include "conversionHelpers.h"
 
 #ifndef CONFIG_GLOBALS
 #define CONFIG_GLOBALS
@@ -92,10 +93,8 @@ void setUpConfig() {
     if (configNeedsSaving) {
         strncpy(configData.mqttServer, custom_mqtt_server.getValue(), MQTT_SERVER_STRLEN);
         Serial.println(&mqttPortStr[0]);
-        char** conversionErrorPos = 0;
-        unsigned long convertedPort = strtoul(&mqttPortStr[0], conversionErrorPos, 10);
-        Serial.println(convertedPort);
-        if (conversionErrorPos == 0) {
+        unsigned long convertedPort = strToInt(&mqttPortStr[0]);
+        if (convertedPort >= 0) {
             configData.mqttPort = convertedPort;
         } else {
             Serial.print("Error converting MQTT Port number: "); Serial.println(mqttPortStr);

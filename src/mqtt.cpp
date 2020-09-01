@@ -33,7 +33,7 @@ void onMqttMessage(char* topic, byte* payload, unsigned int length) {
     free(plStr);
 }
 
-void subscribeToTopic(char* topic, void (*callback)(char*)) {
+char* createFullTopicStr(const char* topic) {
     char* deviceName = getDeviceName();
     unsigned int topicLen = strlen(deviceName)+1+strlen(topic);
     char* fullTopicStr = (char*) calloc(topicLen+1, sizeof(char));
@@ -41,6 +41,11 @@ void subscribeToTopic(char* topic, void (*callback)(char*)) {
     strncpy(fullTopicStr+strlen(deviceName), "/", 1);
     strncpy(fullTopicStr+strlen(deviceName)+1, topic, strlen(topic));
     *(fullTopicStr + topicLen+1) = 0;
+    return fullTopicStr;
+}
+
+void subscribeToTopic(const char* topic, void (*callback)(char*)) {
+    char* fullTopicStr = createFullTopicStr(topic);
     mqttClient.subscribe(fullTopicStr);
     subscribedMqttTopic* newTopic = (subscribedMqttTopic*) malloc(sizeof(subscribedMqttTopic));
     newTopic->topic = fullTopicStr;
@@ -84,8 +89,10 @@ void mqttSetup(void (*subscriptionCallback)()) {
     connectToMqtt(subscriptionCallback);
 }
 
-void publishToMqtt(char* topic, char* payload) {
-    mqttClient.publish(topic, payload);
+void publishToMqtt(const char* topic, char* payload) {
+    char* fullTopicStr = createFullTopicStr(topic);
+    mqttClient.publish(fullTopicStr, payload);
+    free(fullTopicStr);
 }
 
 void mqttLoop() {
