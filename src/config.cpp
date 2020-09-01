@@ -66,6 +66,7 @@ void setUpConfig() {
         printConfig(configData);
     } else {
         Serial.println("Configuration is empty.");
+        WiFi.disconnect();
     }
 
     WiFiManager wifiManager;

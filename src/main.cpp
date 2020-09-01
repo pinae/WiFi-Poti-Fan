@@ -63,7 +63,7 @@ void setup() {
   mqttSetup(mqttSubscribe);
   reportTimer = 0;
   Serial.println("\n\nSetup complete.");
-  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(LED_BUILTIN, HIGH);
 }
 
 void loop() {
