@@ -10,7 +10,7 @@
 
 unsigned long lastTrigger;
 int mode = MODE_MANUAL;
-int setSpeed = 100;
+int setSpeed = 25;
 int lastManualValue = 0;
 unsigned long reportTimer = 0;
 
@@ -58,6 +58,7 @@ void setup() {
   analogWriteFreq(25000);
   lastTrigger = millis();
   attachInterrupt(digitalPinToInterrupt(TACHO_PIN), onFanRotation, RISING);
+  analogWrite(FAN_PWM_PIN, constrain(map(setSpeed, 0, 100, 0, PWMRANGE), 0, PWMRANGE));
   while(!Serial) {}  // Wait for Serial to start
   setUpConfig();
   mqttSetup(mqttSubscribe);
