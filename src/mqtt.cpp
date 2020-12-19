@@ -1,16 +1,20 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+#include "debugLogger.h"
 #include "mqtt.h"
-#include "config.h"
+#include "configHelpers.h"
 
 #ifndef MQTT_GLOBALS
 #define MQTT_GLOBALS
 
+extern DeviceName devName;
+extern DebugLogger logger;
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 subscribedMqttTopicList* subscribedTopicsList;
 void (*savedSubscriptionCallback)();
+bool setupDone = false;
 
 #endif
 
@@ -18,23 +22,23 @@ void onMqttMessage(char* topic, byte* payload, unsigned int length) {
     char* plStr = (char*) calloc(length+1, sizeof(char));
     strncpy(&plStr[0], (char*) payload, length);
     *(plStr + length) = 0;
-    Serial.printf("MQTT: %s (len: %d) - Payload: %s\n", 
+    logger.printf("MQTT: %s (len: %d) - Payload: %s\n", 
                   topic, length, plStr);
     subscribedMqttTopicList* stl = subscribedTopicsList;
     while(stl != NULL) {
         if (strcmp(stl->entry->topic, topic) == 0) {
-            Serial.printf("Found topic: %s\n", stl->entry->topic);
+            logger.printf("Found topic: %s\n", stl->entry->topic);
             stl->entry->callback(plStr);
             break;
         }
         stl = (*stl).next;
     }
-    Serial.println("-----------------");
+    logger.printf("-----------------\n");
     free(plStr);
 }
 
 char* createFullTopicStr(const char* topic) {
-    char* deviceName = getDeviceName();
+    char* deviceName = devName.get();
     unsigned int topicLen = strlen(deviceName)+1+strlen(topic);
     char* fullTopicStr = (char*) calloc(topicLen+1, sizeof(char));
     strncpy(fullTopicStr, deviceName, strlen(deviceName));
@@ -54,28 +58,26 @@ void subscribeToTopic(const char* topic, void (*callback)(char*)) {
     newTopicListElem->entry = newTopic;
     newTopicListElem->next = subscribedTopicsList;
     subscribedTopicsList = newTopicListElem;
-    Serial.print("Subscribed to MQTT-topic: "); Serial.println(fullTopicStr);
+    logger.printf("Subscribed to MQTT-topic: %s\n", fullTopicStr);
 }
 
 void connectToMqtt(void (*subscriptionCallback)()) {
     boolean successfullyConnected = false;
     while (!mqttClient.connected()) {
-        Serial.print("Attempting MQTT connection... ");
+        logger.printf("Attempting MQTT connection... ");
         if (strlen(getMqttUsername()) > 0 && strlen(getMqttPassword())) {
-            Serial.printf("\nMQTT: Using credentials: %s PW: %s\n", 
+            logger.printf("\nMQTT: Using credentials: %s PW: %s\n", 
                           getMqttUsername(), getMqttPassword());
             successfullyConnected = mqttClient.connect(
-                getDeviceName(), getMqttUsername(), getMqttPassword());
+                devName.get(), getMqttUsername(), getMqttPassword());
         } else {
-            successfullyConnected = mqttClient.connect(getDeviceName());
+            successfullyConnected = mqttClient.connect(devName.get());
         }
         if (successfullyConnected) {
-            Serial.println("connected!");
+            logger.printf("connected!\n");
             subscriptionCallback();
         } else {
-            Serial.print("failed, rc=");
-            Serial.print(mqttClient.state());
-            Serial.println(" try again in 2 seconds");
+            logger.printf("failed, rc=%d \ntry again in 2 seconds.\n", mqttClient.state());
             // Wait 2 seconds before retrying
             delay(2000);
         }
@@ -87,6 +89,7 @@ void mqttSetup(void (*subscriptionCallback)()) {
     mqttClient.setServer(getMqttServer(), getMqttPort());
     mqttClient.setCallback(onMqttMessage);
     connectToMqtt(subscriptionCallback);
+    setupDone = true;
 }
 
 void publishToMqtt(const char* topic, char* payload) {
@@ -96,6 +99,7 @@ void publishToMqtt(const char* topic, char* payload) {
 }
 
 void mqttLoop() {
+    if (!setupDone) return;
     if (!mqttClient.connected()) {
         connectToMqtt(savedSubscriptionCallback);
     }
