@@ -23,3 +23,4 @@ unsigned long getMqttPort();
 char* getMqttUsername();
 char* getMqttPassword();
 void loopWifiChecks();
+void iotWebConfDelay(unsigned long duration);

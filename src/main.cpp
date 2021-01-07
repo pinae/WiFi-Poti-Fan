@@ -8,7 +8,7 @@
 
 #define TACHO_PIN 5
 #define FAN_PWM_PIN 4
-#define CONFIG_VERSION "v0.2"
+#define CONFIG_VERSION "v0.2.1"
 
 DeviceName devName;
 DebugLogger logger;
@@ -78,7 +78,6 @@ void loop() {
       Serial.printf("Switched to manual at %f%%.\n", ((float) newManualValue)/PWMRANGE*100.0);
     }
   }
-  mqttLoop();
   //Serial.printf("%d Manual value: %d\n", mode, lastManualValue);
   switch (mode) {
     case MODE_SET:

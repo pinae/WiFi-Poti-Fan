@@ -26,8 +26,8 @@ IotWebConfParameter mqttUserNameParam = IotWebConfParameter(
     "MQTT user", "mqttUser", mqttUserNameValue, STRING_LEN);
 IotWebConfParameter mqttUserPasswordParam = IotWebConfParameter(
     "MQTT password", "mqttPass", mqttUserPasswordValue, STRING_LEN, "password");
-boolean needMqttConnect = false;
-boolean needReset = false;
+bool needReset = false;
+bool wifiIsConnected = false;
 extern int mode;
 extern int setSpeed;
 extern int lastManualValue;
@@ -55,7 +55,7 @@ char* DeviceName::get() {
 }
 
 void wifiConnected() {
-    needMqttConnect = true;
+    wifiIsConnected = true;
 }
 
 void configSaved() {
@@ -119,13 +119,15 @@ void mqttSubscribe() {
 }
 
 void loopWifiChecks() {
-    if (needMqttConnect) {
-        mqttSetup(mqttSubscribe);
-        needMqttConnect = false;
-    }
+    mqttSetup(mqttSubscribe);
+    mqttLoop();
     if (needReset) {
         Serial.println("Rebooting after 1 second.");
         iotWebConf.delay(1000);
         ESP.restart();
     }
+}
+
+void iotWebConfDelay(unsigned long duration) {
+    iotWebConf.delay(duration);
 }
