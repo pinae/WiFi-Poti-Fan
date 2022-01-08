@@ -18,6 +18,8 @@
 #define CONFIG_GLOBALS
 #define STRING_LEN 128
 
+extern int PWMRANGE;
+
 char mqttServerValue[STRING_LEN];
 char mqttPortValue[6] = {'1', '8', '8', '3', '\0', '\0'};
 char mqttUserNameValue[STRING_LEN];
