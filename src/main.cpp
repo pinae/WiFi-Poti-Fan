@@ -8,7 +8,7 @@
 
 #define TACHO_PIN 5
 #define FAN_PWM_PIN 4
-#define CONFIG_VERSION "v0.2.1"
+#define CONFIG_VERSION "v0.2.2"
 
 DeviceName devName;
 DebugLogger logger;
