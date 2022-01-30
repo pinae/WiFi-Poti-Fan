@@ -35,7 +35,7 @@ HTTPUpdateServer httpUpdater;
 
 extern IotWebConf iotWebConf;
 iotwebconf::ParameterGroup mqttgroup = iotwebconf::ParameterGroup(
-    "mqttgroup", "");
+    "mqttgroup", "MQTT");
 iotwebconf::TextParameter mqttServerParam = iotwebconf::TextParameter(
     "MQTT server", "mqttServer", mqttServerValue, STRING_LEN);
 iotwebconf::NumberParameter mqttPortParam = iotwebconf::NumberParameter(
