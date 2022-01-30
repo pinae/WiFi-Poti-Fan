@@ -19,7 +19,7 @@ int lastManualValue = 0;
 unsigned long reportTimer = 0;
 unsigned long lastSpeedReport = 0;
 float fanSpeed = 0;
-int PWMRANGE;
+int PWMRANGE = 1023;
 const char wifiInitialApPassword[] = "loving_ct";
 DNSServer dnsServer;
 WebServer server(80);
