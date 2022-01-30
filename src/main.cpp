@@ -25,7 +25,7 @@ DNSServer dnsServer;
 WebServer server(80);
 IotWebConf iotWebConf(devName.get(), &dnsServer, &server, wifiInitialApPassword, CONFIG_VERSION);
 
-ICACHE_RAM_ATTR void onFanRotation() {
+IRAM_ATTR void onFanRotation() {
   unsigned long now = millis();
   //logger.printf("onFanRotation: %ul %ul\n", lastTrigger, now);
   reportTimer += now-lastTrigger;
