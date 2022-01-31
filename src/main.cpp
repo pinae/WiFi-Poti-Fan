@@ -8,7 +8,7 @@
 
 #define TACHO_PIN 5
 #define FAN_PWM_PIN 4
-#define CONFIG_VERSION "v0.2.1"
+#define CONFIG_VERSION "v0.2.2"
 
 DeviceName devName;
 DebugLogger logger;
@@ -19,12 +19,13 @@ int lastManualValue = 0;
 unsigned long reportTimer = 0;
 unsigned long lastSpeedReport = 0;
 float fanSpeed = 0;
+int PWMRANGE = 1023;
 const char wifiInitialApPassword[] = "loving_ct";
 DNSServer dnsServer;
 WebServer server(80);
 IotWebConf iotWebConf(devName.get(), &dnsServer, &server, wifiInitialApPassword, CONFIG_VERSION);
 
-ICACHE_RAM_ATTR void onFanRotation() {
+IRAM_ATTR void onFanRotation() {
   unsigned long now = millis();
   //logger.printf("onFanRotation: %ul %ul\n", lastTrigger, now);
   reportTimer += now-lastTrigger;
